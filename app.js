@@ -1,5 +1,7 @@
 const express = require('express')
+const bodyParser = require('body-parser');
 const app = express()
+app.use(bodyParser.json());
 const port = 3000
 
 function isAuthorized(req, res, next) {
@@ -12,10 +14,8 @@ function isAuthorized(req, res, next) {
     }
 }
 
-app.get('/', (req, res) => res.send('Hello World!'))
-
 app.post('/uploaduser', isAuthorized, (req,res) => {
-    uploadData(req);
+    uploadData(req.body);
     res.json([{
       status: 'Upload successful'
     }])
@@ -27,10 +27,15 @@ app.get('/healthcheck', (req,res) => {
     }])
 })
 
-function uploadData(req)
+function uploadData(body)
 {
+    let name = body.name;
+    let age = body.age;
+    let lat = body.lat;
+    let lon = body.lon;
+    let phone = body.phone;
+    let email = body.email;
     return;
 }
 
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Listening on port ${port}`))

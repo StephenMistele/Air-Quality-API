@@ -14,18 +14,23 @@ function isAuthorized(req, res, next) {
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
-app.get('/users', isAuthorized, (req,res) => {
+app.post('/uploaduser', isAuthorized, (req,res) => {
     uploadData(req);
     res.json([{
       status: 'Upload successful'
     }])
 })
 
-app.get('/products', (req, res) => {
-  res.json([{
-    id: 1,
-    name: 'The Bluest Eye'
-  }])
+app.get('/healthcheck', (req,res) => {
+    res.status(200).json([{
+      status: 'Still Alive'
+    }])
 })
+
+function uploadData(req)
+{
+    return;
+}
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

@@ -35,15 +35,16 @@ function isAuthorized(req, res, next) {
 
 function uploadData(body)
 {
-    let name = body.name;
-    let age = body.age;
-    let gender = body.gender;
-    let weight = body.weight;
-    let lat = body.lat;
-    let lon = body.lon;
-    let phone = body.phone;
-    let email = body.email;
-    return;
+  /*formatting
+  name = body.name;
+  age = body.age;
+  weight = body.weight;
+  lat = body.lat;
+  lon = body.lon;
+  phone = body.phone;
+  email = body.email;
+  */
+  return;
 }
 
 async function getAQIData(body)
@@ -52,6 +53,31 @@ async function getAQIData(body)
   const res = await response.json();
   delete res.metadata;
   return res;
+}
+
+//driver function for notifying users regarding data. Called each morning
+function notifyUsers(){
+  const users = getUsers();
+  for(var i = 0; i < users.length; i++) {
+    let user = users[i];
+    let userLocationInfo = getAQIData(user);
+    let parsedUserDangerInfo = parseUserDangerInfo(userLocationInfo, user.age, user.weight);//reformat data to usable state
+    textUser(parsedUserDangerInfo, user.phone);
+  }
+}
+
+//return json array of objects, each element representing a user in the format uploaded -- NICK
+function getUsers(){
+  return;
+}
+
+//parse breezeometer response for relevant data
+function parseUserDangerInfo(userLocationInfom, age, weight){
+  return;
+}
+
+function textUser(parsedUserDangerInfo, phone){
+  return;
 }
 
 app.listen(port, () => console.log(`Listening on port ${port}`))

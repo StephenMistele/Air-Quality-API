@@ -1,14 +1,13 @@
-import bodyParser from "body-parser";
-import express from "express";
-import fetch from"node-fetch";
+const bodyParser = require("body-parser");
+const express = require("express");
+const fetch = require("node-fetch");
 const app = express();
 app.use(bodyParser.json());
 const port = 3000
 
 const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
 const authToken = "4e9196ca16458ce98ae4fd1c80b0ba68";
-import client from 'twilio';
-client(accountSid, authToken);
+const client = require('twilio')(accountSid, authToken);
 
 
 app.get('/healthcheck', (req,res) => {
@@ -90,13 +89,14 @@ function parseUserDangerInfo(userLocationInfo, age, weight){
 }
 
 function textUser(parsedUserDangerInfo, phone){
+  console.log(phone);
   client.messages
     .create({
       body: parsedUserDangerInfo,
       from: '+12184132230',
       to: phone
     })
-    .then(message => console.log(message.sid));
+    .then(message => console.log(message));
   return;
 }
 

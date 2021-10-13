@@ -1,13 +1,14 @@
-const bodyParser = require("body-parser");
-const express = require("express");
-
+import bodyParser from "body-parser";
+import express from "express";
+import fetch from"node-fetch";
 const app = express();
 app.use(bodyParser.json());
 const port = 3000
 
 const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
 const authToken = "4e9196ca16458ce98ae4fd1c80b0ba68";
-const client = require('twilio')(accountSid, authToken);
+import client from 'twilio';
+client(accountSid, authToken);
 
 
 app.get('/healthcheck', (req,res) => {
@@ -84,7 +85,7 @@ function getUsers(){
 }
 
 //parse breezeometer response for relevant data
-function parseUserDangerInfo(userLocationInfom, age, weight){
+function parseUserDangerInfo(userLocationInfo, age, weight){
   return;
 }
 

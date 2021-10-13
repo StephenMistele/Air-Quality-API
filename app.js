@@ -1,9 +1,14 @@
-import fetch from "node-fetch";
-import express from "express";
-import bodyParser from "body-parser";
-const app = express()
+const bodyParser = require("body-parser");
+const express = require("express");
+
+const app = express();
 app.use(bodyParser.json());
 const port = 3000
+
+const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
+const authToken = "4e9196ca16458ce98ae4fd1c80b0ba68";
+const client = require('twilio')(accountSid, authToken);
+
 
 app.get('/healthcheck', (req,res) => {
     res.status(200).json([{
@@ -16,6 +21,13 @@ app.post('/uploaduser', isAuthorized, (req,res) => {
     res.json([{
       status: 'Upload successful'
     }])
+})
+
+app.post('/text', isAuthorized, (req,res) => {
+  textUser(req.body.content, req.body.phone);
+  res.json([{
+    status: 'Upload successful'
+  }])
 })
 
 app.post('/getdata', isAuthorized, async (req,res) => {
@@ -56,10 +68,10 @@ async function getAQIData(body)
 }
 
 //driver function for notifying users regarding data. Called each morning
-function notifyUsers(){
+function notifyUsers(body){
   const users = getUsers();
   for(var i = 0; i < users.length; i++) {
-    let user = users[i];
+    let user = body//users[i];
     let userLocationInfo = getAQIData(user);
     let parsedUserDangerInfo = parseUserDangerInfo(userLocationInfo, user.age, user.weight);//reformat data to usable state
     textUser(parsedUserDangerInfo, user.phone);
@@ -77,6 +89,13 @@ function parseUserDangerInfo(userLocationInfom, age, weight){
 }
 
 function textUser(parsedUserDangerInfo, phone){
+  client.messages
+    .create({
+      body: parsedUserDangerInfo,
+      from: '+12184132230',
+      to: phone
+    })
+    .then(message => console.log(message.sid));
   return;
 }
 

@@ -1,13 +1,12 @@
 const bodyParser = require("body-parser");
-const { json } = require("express");
+const requestify = require('requestify');
 const express = require("express");
-const request = require('request');
 const app = express();
 app.use(bodyParser.json());
 const port = 3000
 
 const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
-const authToken = "4e9196ca16458ce98ae4fd1c80b0ba68";
+const authToken = "ae3fbad708551624b1356406985f30ea";
 const client = require('twilio')(accountSid, authToken); 
 
 
@@ -63,20 +62,14 @@ function uploadData(body)
 async function getAQIData(body)
 {
   let url = "https://api.breezometer.com/air-quality/v2/current-conditions?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&metadata=extended_aqi&features=breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,all_pollutants_concentrations,pollutants_aqi_information&lat=" + body.lat + "&lon=" + body.lon + "&all_aqi=true";
-  try {
-    let response = await request(url, function (error, response, body) {
-      console.error('error:', error); // Print the error if one occurred
-      console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    }).body;
-    let res = JSON.parse(response);
-    delete res.metadata;
-    console.log(res);
-    return res; 
-  }
-  catch {
-    return "failed to query breezometer API";
-  }
-  
+  let output = await requestify.get(url)
+    .then(function(response) {
+        let res = response.getBody();
+        delete res.metadata;
+        return res;
+      }
+    );
+  return output;
 }
 
 //driver function for notifying users regarding data. Called each morning
@@ -101,7 +94,7 @@ function parseUserDangerInfo(userLocationInfo, age, weight){
 }
 
 function textUser(parsedUserDangerInfo, phone){
-  console.log(phone);
+  console.log("texting: ", phone, parsedUserDangerInfo);
   client.messages
     .create({
       body: parsedUserDangerInfo,

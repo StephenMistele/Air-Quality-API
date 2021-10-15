@@ -19,6 +19,7 @@
   "homepage": "https://github.com/StephenMistele/Air-Quality-Project#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "requestify": "^0.2.5",
     "twilio": "^3.69.0"
   }
 }

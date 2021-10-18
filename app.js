@@ -1,9 +1,11 @@
 const bodyParser = require("body-parser");
+var cors = require('cors')
 const requestify = require('requestify');
 const express = require("express");
 const app = express();
 app.use(bodyParser.json());
 const port = 3000
+app.use(cors())
 
 const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
 const authToken = "ae3fbad708551624b1356406985f30ea";

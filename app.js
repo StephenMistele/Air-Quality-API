@@ -17,7 +17,7 @@ app.get('/healthcheck', (req,res) => {
 })
 
 app.post('/uploaduser', isAuthorized, (req,res) => {
-    uploadData(req.body);
+    uploadNewUser(req.body);
     res.json([{
       status: 'Upload successful'
     }])
@@ -45,16 +45,16 @@ function isAuthorized(req, res, next) {
     }
 }
 
-function uploadData(body)
+function uploadNewUser(body)
 {
-  /*formatting*/
+  /*DB entries should be formatted as such*/
   let name = body.name;
   let age = body.age;
-  /*let weight = body.weight;
+  let weight = body.weight;
   let lat = body.lat;
   let lon = body.lon;
   let phone = body.phone;
-  let email = body.email;*/
+  let email = body.email;
   console.log(name, age)
   return;
 }

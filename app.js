@@ -13,16 +13,16 @@ const client = require('twilio')(accountSid, authToken);
 
 
 app.get('/healthcheck', (req,res) => {
-    res.status(200).json([{
-      status: 'Still Alive'
-    }])
+  res.status(200).json([{
+    status: 'Still Alive'
+  }])
 })
 
 app.post('/uploaduser', isAuthorized, (req,res) => {
-    uploadNewUser(req.body);
-    res.json([{
-      status: 'Upload successful'
-    }])
+  uploadNewUser(req.body);
+  res.json([{
+    status: 'Upload successful'
+  }])
 })
 
 app.post('/text', isAuthorized, (req,res) => {
@@ -38,13 +38,13 @@ app.post('/getdata', isAuthorized, async (req,res) => {
 })
 
 function isAuthorized(req, res, next) {
-    const auth = req.headers.authorization;
-    if (auth === 'secretpassword') {
-      next();
-    } else {
-      res.status(401);
-      res.send('Not permitted');
-    }
+  const auth = req.headers.authorization;
+  if (auth === 'secretpassword') {
+    next();
+  } else {
+    res.status(401);
+    res.send('Not permitted');
+  }
 }
 
 function uploadNewUser(body)

@@ -1,7 +1,11 @@
 const bodyParser = require("body-parser");
 var cors = require("cors");
-const requestify = require("requestify");
 const express = require("express");
+//config
+const config = require("./config");
+console.log("Running in node environment: "+process.env.NODE_ENV);
+//
+const requestify = require("requestify");
 const app = express();
 const port = 3000;
 app.use(cors({ origin: true, credentials: true }));
@@ -11,10 +15,9 @@ app.use(bodyParser.json());
 const mongoHelpers = require('./mongoFunctions.js');
 //monogo *deline
 const { MongoClient } = require('mongodb');
-const uri = "";
+const uri = `mongodb+srv://${config.config.db.DB_USER}:${config.config.db.DB_PASS}@${config.config.db.DB_HOST}?retryWrites=true&w=majority`;
 const { ObjectID } = require('bson');
 //mongo end *deline
-const port = 3000
 app.set('json spaces',2)
 app.use(cors())
 

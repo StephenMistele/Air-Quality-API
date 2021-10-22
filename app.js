@@ -4,7 +4,14 @@ const requestify = require('requestify');
 const express = require("express");
 const app = express();
 app.use(bodyParser.json());
+const mongoHelpers = require('./mongoFunctions.js');
+//monogo *deline
+const { MongoClient } = require('mongodb');
+const uri = "";
+const { ObjectID } = require('bson');
+//mongo end *deline
 const port = 3000
+app.set('json spaces',2)
 app.use(cors())
 
 const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
@@ -18,6 +25,35 @@ app.get('/healthcheck', (req,res) => {
     }])
 })
 
+app.get('/mongoread', (req, res) => {
+  console.log("startofMain");
+  res.setHeader("status","Attempting Read");
+  console.log(res.getHeader("status"));
+  console.log("header^");
+  var result = mongoHelpers.mongoRead("sample_weatherdata",res);
+  console.log("result in main: ");
+  console.log(result);
+})
+
+app.get('/mongowrite', (req, res) => {
+  console.log("startofMain");
+  res.setHeader("status","Attempting write");
+  console.log(res.getHeader("status"));
+  console.log("header^");
+  var myobj = {
+    "_id" : new ObjectID(),
+    "position":{
+      "type":"Point",
+      "coordinates":[-47.9,47.6]
+    } ,
+    "elevation":420,
+    "callLetters":"KEVN",
+    "type":"DUMB"
+  };
+  var result = mongoHelpers.mongoWrite("sample_weatherdata",myobj,res);
+  console.log("result in main: ");
+  console.log(result);
+})
 app.post('/uploaduser', isAuthorized, (req,res) => {
     uploadNewUser(req.body);
     res.json([{

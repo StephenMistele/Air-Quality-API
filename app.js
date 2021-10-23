@@ -36,7 +36,7 @@ app.post('/text', isAuthorized, (req,res) => {
 });
 
 app.post("/getdata", isAuthorized, async (req, res) => {
-  let temp = await getAQIData(req.body);
+  let temp = await notifyUsers(req.body);
   res.send(temp);
 });
 
@@ -64,47 +64,50 @@ function uploadNewUser(body) {
 }
 
 async function getAQIData(body) {
-  let regularUrl =
-    "https://api.breezometer.com/air-quality/v2/current-conditions?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&metadata=extended_aqi&features=breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,all_pollutants_concentrations,pollutants_aqi_information&lat=" +
-    body.lat +
-    "&lon=" +
-    body.lon +
-    "&all_aqi=true";
-
-  let forecastUrl = 
-    "https://api.breezometer.com/air-quality/v2/forecast/hourly?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&features=breezometer_aqi,local_aqi&hours=12&lat=" + 
-    body.lat +
-    "&lon=" +
-    body.lon;
-
-    console.log(forecastUrl)
-
-  let regularResponse = await requestify.get(regularUrl).then(function (response) {
-    let res = response.getBody();
-    return res.data;
-  });
-
-  let forecastResponse = await requestify.get(forecastUrl).then(function (response) {
-    let res = response.getBody();
-    return res.data;
-  });
-  
+  let regularResponse = getRegularResponse(body);
+  let forecastResponse = getForecastResponse(body);
   return {regularResponse, forecastResponse}
 }
 
+async function getRegularResponse(body){
+  let regularUrl =
+  "https://api.breezometer.com/air-quality/v2/current-conditions?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&metadata=extended_aqi&features=breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,all_pollutants_concentrations,pollutants_aqi_information&lat=" +
+  body.lat +
+  "&lon=" +
+  body.lon +
+  "&all_aqi=true";
+
+  return await requestify.get(regularUrl).then(function (response) {
+    let res = response.getBody();
+    return res.data;
+  });
+}
+
+async function getForecastResponse(body){
+  let forecastUrl = 
+  "https://api.breezometer.com/air-quality/v2/forecast/hourly?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&features=breezometer_aqi,local_aqi&hours=12&lat=" + 
+  body.lat +
+  "&lon=" +
+  body.lon;
+
+  return await requestify.get(forecastUrl).then(function (response) {
+    let res = response.getBody();
+    return res.data;
+  });
+}
+
 //driver function for notifying users regarding data. Called each morning
-function notifyUsers(body) {
+async function notifyUsers(body) {
   const users = getUsers();
-  for (var i = 0; i < users.length; i++) {
+  //for (var i = 0; i < users.length; i++) {
     let user = body; //users[i];
-    let userLocationInfo = getAQIData(user);
+    let userLocationInfo = await getForecastResponse(user);
     let parsedUserDangerInfo = parseUserDangerInfo(
       userLocationInfo,
-      user.age,
-      user.weight
+      user.risk,
     ); //reformat data to usable state
     textUser(parsedUserDangerInfo, user.phone);
-  }
+  //}
 }
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK
@@ -113,8 +116,28 @@ function getUsers() {
 }
 
 //parse breezeometer response for relevant data
-function parseUserDangerInfo(userLocationInfo, age, weight) {
-  return;
+function parseUserDangerInfo(userLocationInfo, risk) {
+  let prediction = new Array();
+  let max = 0;
+  let avg = 0;
+  for(let i = 0; i < userLocationInfo.length; i++){
+    prediction.push(userLocationInfo[i].indexes.usa_epa_nowcast.aqi)
+    avg+=prediction[i];
+    if (prediction[i] > max)
+      max = prediction[i];
+  }
+  avg = avg/userLocationInfo.length;
+  let s = "The AIR quality index is currently " + prediction[0] + ", rising to " + max + " at its max and finishing the day at " + prediction[prediction.length-1] + ". ";
+  let strEnd = "\n Given your risk demographics, there is nothing to worry about. Go enjoy the outdoors!";
+  if (avg > 50 && avg <= 100 && risk > 2)
+    strEnd = "\n Given your risk demographics, you might experience discomfort as a result of the air quality today. Try limiting outdoor activity if you start to feel affected.";
+  else if (avg > 100 && avg <= 150 && risk == 1)
+    strEnd = "\n Given your risk demographics, strenuous outdoor activity may cause health effects. If you start to feel sick, limit outdoor activity."
+  else if (avg > 100 && avg <= 150 && risk > 1)
+    strEnd = "\n Given your risk demographics, outdoor activity could cause negative health effects. Try to limit outdoor activity."
+  else if (avg > 150)
+    strEnd = "\nWARNING: Very poor air quality. Stay inside as much as possible to limit negative health effects."
+  return s+strEnd;
 }
 
 function textUser(parsedUserDangerInfo, phone) {

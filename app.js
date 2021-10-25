@@ -53,8 +53,8 @@ app.post("/getdata", isAuthorized, async (req, res) => {
   res.send(temp);
 });
 
-app.post("/notifyUsers", isAuthorized, async (req, res) => {
-  notifyUsers(req.body);
+app.get("/notifyUsers", isAuthorized, async (req, res) => {
+  notifyUsers();
   res.json([
     {
       status: "Texting users",
@@ -119,22 +119,23 @@ async function getForecastResponse(body){
 }
 
 //driver function for notifying users regarding data. Called each morning
-async function notifyUsers(body) {
+async function notifyUsers() {
   const users = getUsers();
-  //for (var i = 0; i < users.length; i++) {
-    let user = body; //users[i];
+  console.log(users)
+  for (var i = 0; i < users.length; i++) {
+    let user = users[i];
     let userLocationInfo = await getForecastResponse(user);
     let parsedUserDangerInfo = parseUserDangerInfo(
       userLocationInfo,
       user.risk,
     ); //reformat data to usable state
     textUser(parsedUserDangerInfo, user.phone);
-  //}
+  }
 }
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK
 function getUsers() {
-  return;
+  return mongoHelpers.mongoRead("main");
 }
 
 //parse breezeometer response for relevant data

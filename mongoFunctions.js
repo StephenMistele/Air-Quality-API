@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 const uri = "mongodb+srv://air-user:kevinCurly!11@airquality.7rtdx.mongodb.net/AirQuality?retryWrites=true&w=majority";
 const { ObjectID } = require('bson');
-const mongoRead = (db,res) =>{
+const mongoRead = (db) =>{
     console.log("running mongoRead");
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     client.connect(err => {
@@ -9,9 +9,9 @@ const mongoRead = (db,res) =>{
     // perform actions on the collection object
     collection.find({st : "x+47600-047900"}).toArray(function(err,result){
         if(err){
-        res.status(400).json([{
-        status: 'Failure from Mongo'
-        }])
+        // res.status(400).json([{
+        // status: 'Failure from Mongo'
+        // }])
         throw err;
         }
         console.log("success");
@@ -21,10 +21,10 @@ const mongoRead = (db,res) =>{
         console.log(result);
         console.log("end");
         //res.send("UPDATED???");
-        res.status(200).json([{
-        status: 'Read from Mongo',
-        result: result
-        }])
+        // res.status(200).json([{
+        // status: 'Read from Mongo',
+        // result: result
+        // }])
         //res.write("UPDATED???");
         });
     });

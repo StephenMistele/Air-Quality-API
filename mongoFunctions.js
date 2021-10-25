@@ -23,7 +23,7 @@ const mongoRead = (db,res) =>{
         //res.send("UPDATED???");
         res.status(200).json([{
         status: 'Read from Mongo',
-        resultu: result
+        result: result
         }])
         //res.write("UPDATED???");
         });

@@ -10,9 +10,9 @@ const mongoRead = (db,collection_name,res) =>{
     // perform actions on the collection object
     collection.find({}).toArray(function(err,result){
         if(err){
-        res.status(400).json([{
-        status: 'Failure from Mongo'
-        }])
+        // res.status(400).json([{
+        // status: 'Failure from Mongo'
+        // }])
         throw err;
         }
         console.log("success");
@@ -21,10 +21,12 @@ const mongoRead = (db,collection_name,res) =>{
         console.log("result in func:");
         console.log(result);
         console.log("end");
+        //res.send("UPDATED???");
         res.status(200).json([{
         status: 'Read from Mongo',
-        resultu: result
+        result: result
         }])
+        res.write("UPDATED???");
         });
     });
   }
@@ -43,7 +45,7 @@ const mongoRead = (db,collection_name,res) =>{
           console.log("1 document inserted");
           res.status(200).json([{
             status: 'Wrote into Mongo',
-            resultu: result
+            result: result
             }])
         })
         });

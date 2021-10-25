@@ -1,13 +1,14 @@
 const { MongoClient } = require('mongodb');
-const uri = "mongodb+srv://air-user:kevinCurly!11@airquality.7rtdx.mongodb.net/AirQuality?retryWrites=true&w=majority";
+const config = require("./config");
+const uri = `mongodb+srv://${config.config.db.DB_USER}:${config.config.db.DB_PASS}@${config.config.db.DB_HOST}?retryWrites=true&w=majority`;
 const { ObjectID } = require('bson');
-const mongoRead = (db,res) =>{
+const mongoRead = (db,collection_name,res) =>{
     console.log("running mongoRead");
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     client.connect(err => {
-    const collection = client.db("sample_weatherdata").collection("data");
+    const collection = client.db(db).collection(collection_name);
     // perform actions on the collection object
-    collection.find({st : "x+47600-047900"}).toArray(function(err,result){
+    collection.find({}).toArray(function(err,result){
         if(err){
         res.status(400).json([{
         status: 'Failure from Mongo'
@@ -20,12 +21,10 @@ const mongoRead = (db,res) =>{
         console.log("result in func:");
         console.log(result);
         console.log("end");
-        //res.send("UPDATED???");
         res.status(200).json([{
         status: 'Read from Mongo',
         resultu: result
         }])
-        //res.write("UPDATED???");
         });
     });
   }

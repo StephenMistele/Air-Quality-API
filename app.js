@@ -36,30 +36,31 @@ app.get('/mongoread', (req, res) => {
   res.setHeader("status","Attempting Read");
   console.log(res.getHeader("status"));
   console.log("header^");
-  var result = mongoHelpers.mongoRead("sample_weatherdata",res);
+  var result = mongoHelpers.mongoRead("main","data",res);
   console.log("result in main: ");
   console.log(result);
 })
 
-app.get('/mongowrite', (req, res) => {
+app.post('/mongowrite', (req, res) => {
   console.log("startofMain");
   res.setHeader("status","Attempting write");
   console.log(res.getHeader("status"));
   console.log("header^");
   var myobj = {
     "_id" : new ObjectID(),
-    "position":{
-      "type":"Point",
-      "coordinates":[-47.9,47.6]
-    } ,
-    "elevation":420,
-    "callLetters":"KEVN",
-    "type":"DUMB"
+    "name" : "Kevin Rooney",
+    "age" : 20,
+    "weight" : 170,
+    "lat" : 37.348711,
+    "lon" : -121.938697,
+    "phone" : "+14084021101",
+    "email" : "krooney@scu.edu"
   };
-  var result = mongoHelpers.mongoWrite("sample_weatherdata",myobj,res);
+  var result = mongoHelpers.mongoWrite("main",myobj,res);
   console.log("result in main: ");
   console.log(result);
 })
+
 app.post('/uploaduser', isAuthorized, (req,res) => {
   uploadNewUser(req.body);
   res.json([{
@@ -153,6 +154,7 @@ async function notifyUsers(body) {
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK
 function getUsers() {
+
   return;
 }
 

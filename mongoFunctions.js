@@ -44,7 +44,7 @@ const mongoRead = (db,res) =>{
           console.log("1 document inserted");
           res.status(200).json([{
             status: 'Wrote into Mongo',
-            resultu: result
+            result: result
             }])
         })
         });

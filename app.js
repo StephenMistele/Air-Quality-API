@@ -4,7 +4,6 @@ const express = require("express");
 //config
 const config = require("./config");
 console.log("Running in node environment: "+process.env.NODE_ENV);
-//
 const requestify = require("requestify");
 const app = express();
 const port = 3000;
@@ -32,15 +31,12 @@ app.get('/healthcheck', (req,res) => {
 })
 
 app.get('/mongoread', (req, res) => {
-  var result = mongoHelpers.mongoRead("sample_weatherdata",res);
+  var result = mongoHelpers.mongoRead("main",res);
   console.log(result);
 })
 
-app.post('/uploaduser', (req,res) => {
-  uploadNewUser(req.body);
-  res.json([{
-    status: 'Upload successful'
-  }])
+app.post('/uploaduser', isAuthorized, (req,res) => {
+  uploadNewUser(req.body, res);
 })
 
 app.post('/text', isAuthorized, (req,res) => {
@@ -57,6 +53,14 @@ app.post("/getdata", isAuthorized, async (req, res) => {
   res.send(temp);
 });
 
+app.post("/notifyUsers", isAuthorized, async (req, res) => {
+  notifyUsers(req.body);
+  res.json([
+    {
+      status: "Texting users",
+    },
+  ]);});
+
 function isAuthorized(req, res, next) {
   const auth = req.headers.authorization;
   if (auth === 'secretpassword') {
@@ -67,7 +71,7 @@ function isAuthorized(req, res, next) {
   }
 }
 
-function uploadNewUser(body) {
+function uploadNewUser(body, res) {
   var user = {
     "_id" : new ObjectID(),
     "name":body.name,
@@ -78,12 +82,11 @@ function uploadNewUser(body) {
     "phone":body.phone,
     "email":body.email
   };
-  mongoHelpers.mongoWrite("sample_weatherdata",user,res);
+  mongoHelpers.mongoWrite("main", user, res);
 }
 
 async function getAQIData(body) {
   let regularResponse = await getRegularResponse(body);
-  console.log(regularResponse)
   let forecastResponse = await getForecastResponse(body);
   return {regularResponse, forecastResponse}
 }

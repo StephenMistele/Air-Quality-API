@@ -32,35 +32,11 @@ app.get('/healthcheck', (req,res) => {
 })
 
 app.get('/mongoread', (req, res) => {
-  console.log("startofMain");
-  res.setHeader("status","Attempting Read");
-  console.log(res.getHeader("status"));
-  console.log("header^");
   var result = mongoHelpers.mongoRead("sample_weatherdata",res);
-  console.log("result in main: ");
   console.log(result);
 })
 
-app.get('/mongowrite', (req, res) => {
-  console.log("startofMain");
-  res.setHeader("status","Attempting write");
-  console.log(res.getHeader("status"));
-  console.log("header^");
-  var myobj = {
-    "_id" : new ObjectID(),
-    "position":{
-      "type":"Point",
-      "coordinates":[-47.9,47.6]
-    } ,
-    "elevation":420,
-    "callLetters":"KEVN",
-    "type":"DUMB"
-  };
-  var result = mongoHelpers.mongoWrite("sample_weatherdata",myobj,res);
-  console.log("result in main: ");
-  console.log(result);
-})
-app.post('/uploaduser', isAuthorized, (req,res) => {
+app.post('/uploaduser', (req,res) => {
   uploadNewUser(req.body);
   res.json([{
     status: 'Upload successful'
@@ -77,7 +53,7 @@ app.post('/text', isAuthorized, (req,res) => {
 });
 
 app.post("/getdata", isAuthorized, async (req, res) => {
-  let temp = await notifyUsers(req.body);
+  let temp = await getAQIData(req.body);
   res.send(temp);
 });
 
@@ -92,47 +68,49 @@ function isAuthorized(req, res, next) {
 }
 
 function uploadNewUser(body) {
-  /*DB entries should be formatted as such*/
-  let name = body.name;
-  let age = body.age;
-  let weight = body.weight;
-  let lat = body.lat;
-  let lon = body.lon;
-  let phone = body.phone;
-  let email = body.email;
-  console.log(name, age);
-  return;
+  var user = {
+    "_id" : new ObjectID(),
+    "name":body.name,
+    "age":body.age,
+    "weight":body.weight,
+    "lat":body.lat,
+    "lon":body.lon,
+    "phone":body.phone,
+    "email":body.email
+  };
+  mongoHelpers.mongoWrite("sample_weatherdata",user,res);
 }
 
 async function getAQIData(body) {
-  let regularResponse = getRegularResponse(body);
-  let forecastResponse = getForecastResponse(body);
+  let regularResponse = await getRegularResponse(body);
+  console.log(regularResponse)
+  let forecastResponse = await getForecastResponse(body);
   return {regularResponse, forecastResponse}
 }
 
 async function getRegularResponse(body){
-  let regularUrl =
+  let url =
   "https://api.breezometer.com/air-quality/v2/current-conditions?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&metadata=extended_aqi&features=breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,all_pollutants_concentrations,pollutants_aqi_information&lat=" +
   body.lat +
   "&lon=" +
   body.lon +
   "&all_aqi=true";
 
-  return await requestify.get(regularUrl).then(function (response) {
-    let res = response.getBody();
+  return await requestify.get(url).then(async function (response) {
+    let res = await response.getBody();
     return res.data;
   });
 }
 
 async function getForecastResponse(body){
-  let forecastUrl = 
+  let url = 
   "https://api.breezometer.com/air-quality/v2/forecast/hourly?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&features=breezometer_aqi,local_aqi&hours=12&lat=" + 
   body.lat +
   "&lon=" +
   body.lon;
 
-  return await requestify.get(forecastUrl).then(function (response) {
-    let res = response.getBody();
+  return await requestify.get(url).then(async function (response) {
+    let res = await response.getBody();
     return res.data;
   });
 }

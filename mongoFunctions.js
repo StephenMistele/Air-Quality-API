@@ -1,53 +1,36 @@
 const { MongoClient } = require('mongodb');
-const uri = "mongodb+srv://air-user:kevinCurly!11@airquality.7rtdx.mongodb.net/AirQuality?retryWrites=true&w=majority";
-const { ObjectID } = require('bson');
-const mongoRead = (db) =>{
-    console.log("running mongoRead");
-    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    client.connect(err => {
-    const collection = client.db("sample_weatherdata").collection("data");
-    // perform actions on the collection object
-    collection.find({st : "x+47600-047900"}).toArray(function(err,result){
-        if(err){
-        // res.status(400).json([{
-        // status: 'Failure from Mongo'
-        // }])
-        throw err;
-        }
-        console.log("success");
+const config = require("./config");
+const uri = `mongodb+srv://${config.config.db.DB_USER}:${config.config.db.DB_PASS}@${config.config.db.DB_HOST}?retryWrites=true&w=majority`;
+
+async function mongoRead (db, collection_name){
+    let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
+    var response;
+    try {
+    response = await client.db(db).collection(collection_name).find({}).toArray();
+    }
+    catch(err){
+        console.log(err);
+    }
+    finally {
         client.close();
-        console.log("result: \n");
-        console.log("result in func:");
-        console.log(result);
-        console.log("end");
-        //res.send("UPDATED???");
-        // res.status(200).json([{
-        // status: 'Read from Mongo',
-        // result: result
-        // }])
-        //res.write("UPDATED???");
-        });
-    });
-  }
-  
-  const mongoWrite = (db,myobj,res) =>{
-        console.log("writing");
-        const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-        client.connect(err=> {
-        client.db(db).collection("data").insertOne(myobj, function(err, result){
-            if(err){
-                res.status(400).json([{
-                status: 'Failure from Mongo'
-                }])
-                throw err;
-                }
-          console.log("1 document inserted");
-          res.status(200).json([{
-            status: 'Wrote into Mongo',
-            result: result
-            }])
-        })
-        });
-  }
-  exports.mongoRead = mongoRead;
-  exports.mongoWrite = mongoWrite;
+    }
+    return response;
+}
+
+async function mongoWrite(db, myobj){
+    let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
+    var response;
+    try {
+        response = await client.db(db).collection("data").insertOne(myobj);
+    }
+    catch(err){
+        console.log(err);
+    }
+    finally {
+        client.close();
+    }
+    return response;
+}
+
+exports.mongoRead = mongoRead;
+exports.mongoUpload = mongoWrite;

@@ -152,12 +152,7 @@ async function notifyUsers() {
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK
 async function getUsers() {
-  let res = {
-    result: ""
-  };
-  await mongoHelpers.mongoRead("main","data",res);
-  console.log(res)
-  return res.result;
+  return await mongoHelpers.mongoRead("main","data");
 }
 
 //parse breezeometer response for relevant data

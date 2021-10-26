@@ -4,13 +4,10 @@ const uri = `mongodb+srv://${config.config.db.DB_USER}:${config.config.db.DB_PAS
 const { ObjectID } = require('bson');
 
 async function mongoRead (db,collection_name){
-    console.log("a");
     let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
-    console.log("b");
     var response;
     try {
     response = await client.db(db).collection(collection_name).find({}).toArray();
-    console.log("d");
     }
     catch(err){
         console.log(err);

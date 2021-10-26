@@ -52,4 +52,10 @@ app.get("/notifyUsers", APIFunctions.isAuthorized, async (req, res) => {
   ]);
 });
 
+//TEST FUNCTIONS
+app.post("/text", APIFunctions.isAuthorized, async (req, res) => {
+  APIFunctions.textUser(req.body.content, req.body.phone);
+  res.send("texting?");
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));

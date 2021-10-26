@@ -65,7 +65,7 @@ async function getForecastResponse(body){
       });
     }
     catch{
-      console.log("Bad Location")
+      console.log("Bad Location", body.lat, body.lon, url)
       return "Bad Location"
     }
 }
@@ -115,11 +115,11 @@ function parseUserDangerInfo(userLocationInfo, risk) {
     return s+strEnd;
 }
   
-function textUser(parsedUserDangerInfo, phone) {
-    console.log("texting: ", phone, parsedUserDangerInfo);
+function textUser(content, phone) {
+    console.log("texting: ", phone, content);
     client.messages
       .create({
-        body: parsedUserDangerInfo,
+        body: content,
         from: "+12184132230",
         to: phone,
       })

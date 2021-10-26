@@ -31,7 +31,6 @@ app.get('/healthcheck', (req,res) => {
 })
 
 app.get('/mongoread', isAuthorized, async (req, res) => {
-  console.log("startofMain");
   res.setHeader("status","Attempting Read");
   console.log(res.getHeader("status"));
   try{
@@ -59,8 +58,7 @@ function uploadNewUser(body, res) {
   var user = {
     "_id" : new ObjectID(),
     "name":body.name,
-    "age":body.age,
-    "weight":body.weight,
+    "risk":body.risk,
     "lat":body.lat,
     "lon":body.lon,
     "phone":body.phone,
@@ -122,32 +120,37 @@ async function getRegularResponse(body){
 }
 
 async function getForecastResponse(body){
-  console.log(body)
   let url = 
   "https://api.breezometer.com/air-quality/v2/forecast/hourly?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&features=breezometer_aqi,local_aqi&hours=12&lat=" + 
   body.lat +
   "&lon=" +
   body.lon;
 
-  return await requestify.get(url).then(async function (response) {
-    let res = await response.getBody();
-    return res.data;
-  });
+  try{
+    return await requestify.get(url).then(async function (response) {
+      let res = await response.getBody();
+      return res.data;
+    });
+  }
+  catch{
+    console.log("Bad Location")
+    return "Bad Location"
+  }
 }
 
 //driver function for notifying users regarding data. Called each morning
 async function notifyUsers() {
   const users = await getUsers();
-  console.log(users.length)
+  console.log(users, users.length)
   for (var i = 0; i < users.length; i++) {
     let user = users[i];
     let userLocationInfo = await getForecastResponse(user);
-    let parsedUserDangerInfo = parseUserDangerInfo(
-      userLocationInfo,
-      user.risk,
-    ); //reformat data to usable state
-    textUser(parsedUserDangerInfo, user.phone);
+    if (userLocationInfo != "Bad Location"){
+      let parsedUserDangerInfo = parseUserDangerInfo(userLocationInfo, 2)//user.risk); //reformat data to usable state
+      textUser(parsedUserDangerInfo, user.phone);
+    }
   }
+  console.log("done")
 }
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK

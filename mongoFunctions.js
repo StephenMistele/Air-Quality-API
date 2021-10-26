@@ -17,24 +17,24 @@ async function mongoRead (db,collection_name){
     }
     return response;
   }
+  async function mongoWrite(db,myobj){
+    let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
+    var response;
+    console.log("here");
+    try {
+    response = await client.db(db).collection("data").insertOne(myobj);
+    console.log("hello");
 
-  const mongoWrite = (db,myobj,res) =>{
-        const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-        client.connect(err=> {
-        client.db(db).collection("data").insertOne(myobj, function(err, result){
-            if(err){
-                res.status(400).json([{
-                status: 'Failure from Mongo'
-                }])
-                throw err;
-                }
-          console.log("1 document inserted");
-          res.status(200).json([{
-            status: 'Wrote into Mongo',
-            result: result
-            }])
-        })
-        });
+    }
+    catch(err){
+        console.log(err);
+    }
+    finally {
+       client.close();
+    }
+    console.log("ending");
+
+    return response;
   }
   exports.mongoRead = mongoRead;
   exports.mongoUpload = mongoWrite;

@@ -20,8 +20,8 @@ const { ObjectID } = require('bson');
 app.set('json spaces',2)
 app.use(cors())
 
-const accountSid = "ACb7936c6e692c39dcbc6619762a0e3050";
-const authToken = "ae3fbad708551624b1356406985f30ea";
+const accountSid = config.cred.accountSid;
+const authToken = config.cred.authToken;
 const client = require("twilio")(accountSid, authToken);
 
 app.get('/healthcheck', (req,res) => {
@@ -40,29 +40,23 @@ app.get('/mongoread', (req, res) => {
   console.log(result);
 })
 
-app.post('/mongowrite', (req, res) => {
-  console.log("startofMain");
-  console.log("Password: "+req.body.password);
-  res.setHeader("Status","Attempting write");
-  console.log(res.getHeader("status"));
-  var myobj = {
-    "_id" : new ObjectID(),
-    "name" : "Kevin Rooney",
-    "age" : 20,
-    "weight" : 170,
-    "lat" : 37.348711,
-    "lon" : -121.938697,
-    "phone" : "+14084021101",
-    "email" : "krooney@scu.edu"
-  };
-  var result = mongoHelpers.mongoWrite("main",myobj,res);
-  console.log("result in main: ");
-  console.log(result);
-})
-
 app.post('/uploaduser', isAuthorized, (req,res) => {
   uploadNewUser(req.body, res);
 })
+
+function uploadNewUser(body, res) {
+  var user = {
+    "_id" : new ObjectID(),
+    "name":body.name,
+    "age":body.age,
+    "weight":body.weight,
+    "lat":body.lat,
+    "lon":body.lon,
+    "phone":body.phone,
+    "email":body.email
+  };
+  mongoHelpers.mongoUpload("main", user, res);
+}
 
 app.post('/text', isAuthorized, (req,res) => {
   textUser(req.body.content, req.body.phone);
@@ -88,26 +82,12 @@ app.get("/notifyUsers", isAuthorized, async (req, res) => {
 
 function isAuthorized(req, res, next) {
   const auth = req.headers.authorization;
-  if (auth === 'secretpassword') {
+  if (auth === config.secretpassword) {
     next();
   } else {
     res.status(401);
     res.send('Not permitted');
   }
-}
-
-function uploadNewUser(body, res) {
-  var user = {
-    "_id" : new ObjectID(),
-    "name":body.name,
-    "age":body.age,
-    "weight":body.weight,
-    "lat":body.lat,
-    "lon":body.lon,
-    "phone":body.phone,
-    "email":body.email
-  };
-  mongoHelpers.mongoWrite("main", user, res);
 }
 
 async function getAQIData(body) {

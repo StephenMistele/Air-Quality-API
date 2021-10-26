@@ -30,12 +30,23 @@ app.get('/healthcheck', (req,res) => {
   }])
 })
 
-app.get('/mongoread', isAuthorized, (req, res) => {
+app.get('/mongoread', isAuthorized, async (req, res) => {
   console.log("startofMain");
   res.setHeader("status","Attempting Read");
   console.log(res.getHeader("status"));
-  console.log("header^");
-  var result = mongoHelpers.mongoRead("main","data",res);
+  try{
+  var result = await mongoHelpers.mongoRead("main","data");
+  }catch(err){
+    res.status(400).json([{
+      status: 'Failure from Mongo'
+      }])
+      throw err;
+  }
+console.log("1 document inserted");
+res.status(200).json([{
+status: 'Wrote into Mongo',
+result: result
+}])
   console.log("result in main: ");
   console.log(result);
 })

@@ -30,7 +30,7 @@ app.get('/healthcheck', (req,res) => {
   }])
 })
 
-app.get('/mongoread', (req, res) => {
+app.get('/mongoread', isAuthorized, (req, res) => {
   console.log("startofMain");
   res.setHeader("status","Attempting Read");
   console.log(res.getHeader("status"));
@@ -82,7 +82,7 @@ app.get("/notifyUsers", isAuthorized, async (req, res) => {
 
 function isAuthorized(req, res, next) {
   const auth = req.headers.authorization;
-  if (auth === config.secretpassword) {
+  if (auth === config.cred.secretpassword) {
     next();
   } else {
     res.status(401);

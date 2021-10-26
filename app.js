@@ -41,7 +41,7 @@ app.get('/mongoread', isAuthorized, (req, res) => {
 })
 
 app.post('/uploaduser', isAuthorized, (req,res) => {
-  uploadNewUser(req.body, res);
+  uploadNewUser(req.body);
 })
 
 function uploadNewUser(body, res) {
@@ -73,7 +73,7 @@ app.post("/getdata", isAuthorized, async (req, res) => {
 });
 
 app.get("/notifyUsers", isAuthorized, async (req, res) => {
-  notifyUsers();
+  notifyUsers(req);
   res.json([
     {
       status: "Texting users",
@@ -111,6 +111,7 @@ async function getRegularResponse(body){
 }
 
 async function getForecastResponse(body){
+  console.log(body)
   let url = 
   "https://api.breezometer.com/air-quality/v2/forecast/hourly?lang=en&key=496bfcfb6ddd40ef831e29858c8ba7a9&features=breezometer_aqi,local_aqi&hours=12&lat=" + 
   body.lat +
@@ -125,8 +126,8 @@ async function getForecastResponse(body){
 
 //driver function for notifying users regarding data. Called each morning
 async function notifyUsers() {
-  const users = getUsers();
-  console.log(users)
+  const users = await getUsers();
+  console.log(users.length)
   for (var i = 0; i < users.length; i++) {
     let user = users[i];
     let userLocationInfo = await getForecastResponse(user);
@@ -139,8 +140,13 @@ async function notifyUsers() {
 }
 
 //return json array of objects, each element representing a user in the format uploaded -- NICK
-function getUsers() {
-  return mongoHelpers.mongoRead("main"); //da fuq is dis
+async function getUsers() {
+  let res = {
+    result: ""
+  };
+  await mongoHelpers.mongoRead("main","data",res);
+  console.log(res)
+  return res.result;
 }
 
 //parse breezeometer response for relevant data

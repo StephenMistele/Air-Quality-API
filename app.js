@@ -52,10 +52,24 @@ result: result
 })
 
 app.post('/uploaduser', isAuthorized, (req,res) => {
-  uploadNewUser(req.body, res);
+  var response;
+  try{
+  response = uploadNewUser(req.body);
+  }
+  catch(err){
+    res.status(400).json([{
+      status: 'Failure from Mongo'
+      }])
+  }
+  res.status(200).json([{
+    status: 'Uploaded User',
+    user: req.body,
+    result: response
+    }])
+
 })
 
-function uploadNewUser(body, res) {
+function uploadNewUser(body) {
   var user = {
     "_id" : new ObjectID(),
     "name":body.name,
@@ -66,7 +80,7 @@ function uploadNewUser(body, res) {
     "phone":body.phone,
     "email":body.email
   };
-  mongoHelpers.mongoUpload("main", user, res);
+  mongoHelpers.mongoUpload("main", user);
 }
 
 app.post('/text', isAuthorized, (req,res) => {

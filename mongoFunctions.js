@@ -3,7 +3,7 @@ const config = require("./config");
 const uri = `mongodb+srv://${config.config.db.DB_USER}:${config.config.db.DB_PASS}@${config.config.db.DB_HOST}?retryWrites=true&w=majority`;
 const { ObjectID } = require('bson');
 
-async function mongoRead (db,collection_name){
+async function mongoRead (db, collection_name){
     let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
     var response;
     try {
@@ -13,11 +13,12 @@ async function mongoRead (db,collection_name){
         console.log(err);
     }
     finally {
-       client.close();
+        client.close();
     }
     return response;
-  }
-  async function mongoWrite(db,myobj){
+}
+
+async function mongoWrite(db, myobj){
     let client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology : true });
     var response;
     console.log("here");
@@ -30,11 +31,12 @@ async function mongoRead (db,collection_name){
         console.log(err);
     }
     finally {
-       client.close();
+        client.close();
     }
     console.log("ending");
 
     return response;
-  }
-  exports.mongoRead = mongoRead;
-  exports.mongoUpload = mongoWrite;
+}
+
+exports.mongoRead = mongoRead;
+exports.mongoUpload = mongoWrite;

@@ -27,7 +27,6 @@ const config = {
     test
 };
 
-
 exports.config = config[env];
 exports.env= env;
 exports.cred = cred;
